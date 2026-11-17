@@ -1,395 +1,624 @@
-/* ── Layout da página ────────────────────────────────────────────────────── */
+/* ── Seleção de empresa — faixa escura + corpo marfim ─────────────────────────
+   Mesmo sistema visual da Análise DFC (AnaliseDrePage.module.css): a faixa
+   grafite traz a marca, o menu de perfil, a saudação e o título; o corpo marfim
+   traz a busca e a lista de empresas. Cores fixas (não dependem do tema do site).
+   Os modais (position: fixed, z-index 100) ficam fora da faixa e do corpo:
+   nada de transform/filter/backdrop-filter em .page ou .corpo. */
 
 .page {
-  min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
-  padding: 40px 32px 60px;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-
-.loadingWrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: var(--bg);
-}
-
-.spinner {
-  width: 28px;
-  height: 28px;
-  border: 3px solid var(--border);
-  border-top-color: var(--gold);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── Header ──────────────────────────────────────────────────────────────── */
-
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.btnVoltar {
-  align-self: flex-start;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 13px;
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.2s;
-  margin-bottom: 8px;
-}
-
-.btnVoltar:hover { color: var(--gold); }
-
-.titulo {
-  font-size: clamp(22px, 3vw, 32px);
-  font-weight: 700;
-  color: var(--text);
-  margin: 0;
-}
-
-.subtitulo {
-  font-size: 14px;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.searchWrap {
-  width: min(100%, 420px);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.searchLabel {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.7px;
-}
-
-.searchInput {
-  width: 100%;
-  height: 44px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--bg-elevated);
-  color: var(--text);
-  padding: 0 14px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.searchInput::placeholder {
-  color: var(--text-muted);
-}
-
-.searchInput:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(201, 162, 42, 0.15);
-}
-
-.emptyState {
-  margin: -20px 0 0;
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
-/* ── Grade de cards (mesmo estilo Netflix da home) ───────────────────────── */
-
-.grade {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-/* ── Card base ───────────────────────────────────────────────────────────── */
-
-.card {
-  flex-shrink: 0;
-  width: 185px;
-  height: 275px;
-  border-radius: 12px;
-  background-color: var(--bg-elevated);
-  border: 1px solid var(--border);
   position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #f2eee3;
+  color: #16140f;
+  font-family: 'Hanken Grotesk', 'Segoe UI', system-ui, sans-serif;
+  overflow-x: clip;
+}
+
+/* Campos e botões herdam a fonte da página (especificidade zero). */
+:where(.page) :where(input, select, button, textarea) {
+  font: inherit;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   overflow: hidden;
-  cursor: pointer;
-  animation: cardIn 0.45s ease both;
-  transition:
-    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.28s ease;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
-.card:hover {
-  transform: translateY(-10px);
-  box-shadow: var(--shadow-card-hover);
-  z-index: 10;
+.conteudo {
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 32px;
 }
 
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(20px) scale(0.96); }
-  to   { opacity: 1; transform: translateY(0)    scale(1); }
+/* ── Faixa escura ── */
+
+.faixa {
+  /* Tokens escuros para o gatilho do menu de perfil quando o site está no tema
+     claro (o MenuPerfil usa var(--text)/--bg-surface/--border nesse caso). */
+  --text:        #ece6d6;
+  --bg-surface:  rgba(255, 255, 255, 0.02);
+  --border:      rgba(244, 239, 227, 0.18);
+  --border-gold: rgba(244, 239, 227, 0.38);
+
+  position: relative;
+  z-index: 3; /* o cartão do menu de perfil desce por cima do corpo */
+  background: #16140f;
+  color: #f4efe3;
 }
 
-/* ── Overlay gradiente ───────────────────────────────────────────────────── */
-
-.overlay {
+/* O brilho dourado tem recorte próprio: a faixa não pode ter overflow hidden
+   (o menu de perfil desce para fora dela). */
+.faixaGlow {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    transparent 25%,
-    rgba(0,0,0,0.5)  60%,
-    rgba(0,0,0,0.92) 100%
-  );
-  transition: background 0.3s ease;
+  overflow: hidden;
+  pointer-events: none;
 }
-
-.overlayHovered {
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,0.1) 0%,
-    rgba(0,0,0,0.65) 45%,
-    rgba(0,0,0,0.97) 100%
-  );
-}
-
-/* ── Conteúdo do card ────────────────────────────────────────────────────── */
-
-.cardContent {
+.faixaGlow::before {
+  content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 14px;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(194, 160, 99, 0.16) 0%, rgba(194, 160, 99, 0) 70%);
+  top: -220px;
+  right: -140px;
+}
+
+.faixa .conteudo {
+  padding-top: 14px;
+  padding-bottom: 26px;
+}
+
+.faixa :where(button, a, [tabindex]):focus-visible {
+  outline: 2px solid #c2a063;
+  outline-offset: 2px;
+}
+
+.nav {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  min-height: 52px;
 }
 
-.cardSettingsButton {
-  position: absolute;
-  top: 10px;
-  right: 50px;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.24);
-  background: rgba(0,0,0,0.46);
-  color: #fff;
+.marca {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 2;
-  opacity: 0;
-  transform: translateY(-4px);
-  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  gap: 10px;
+  font-size: 17px;
+  color: #f4efe3;
+  white-space: nowrap;
 }
+.marca img { display: block; }
+.marca b { font-weight: 700; }
 
-.card:hover .cardSettingsButton {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.cardSettingsButton:hover {
-  background: rgba(201, 162, 42, 0.32);
-}
-
-.cardDeleteButton {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.24);
-  background: rgba(0,0,0,0.46);
-  color: #fff;
-  display: inline-flex;
+.navDir {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 2;
-  opacity: 0;
-  transform: translateY(-4px);
-  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 22px;
+  min-width: 0;
 }
 
-.card:hover .cardDeleteButton {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.cardDeleteButton:hover {
-  background: rgba(220, 38, 38, 0.40);
-  border-color: rgba(220, 38, 38, 0.50);
-}
-
-.cardLabel {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--gold);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
-
-.cardNome {
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1.3;
-  margin: 0;
-}
-
-.cardDono {
-  font-size: 10px;
-  color: rgba(255,255,255,0.76);
-  margin: 0;
-}
-
-.cardCnpj {
-  font-size: 10px;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-/* ── Botão expandível (aparece no hover) ─────────────────────────────────── */
-
-.cardExpandable {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition:
-    grid-template-rows 0.28s ease,
-    opacity 0.22s ease;
-}
-
-.cardExpandable > * { overflow: hidden; }
-
-.cardExpandableOpen {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-
-.btnSelecionar {
-  margin-top: 8px;
-  width: 100%;
-  padding: 7px 0;
-  background: var(--gold);
-  color: #000;
-  border: none;
-  border-radius: 6px;
+.eyebrow {
+  margin: 30px 0 14px;
   font-size: 12px;
   font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #c2a063;
+  overflow-wrap: anywhere;
 }
 
-.btnSelecionar:hover { background: var(--gold-light); }
+.faixaGrid {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px 32px;
+}
 
-/* ── Card "Criar empresa" ─────────────────────────────────────────────────── */
+/* Sem eyebrow (sem saudação), o título não cola na navegação */
+.nav + .faixaGrid { margin-top: 30px; }
 
-.cardNova {
-  background: var(--bg-surface);
-  border: 2px dashed var(--border);
+.faixaTexto { min-width: 0; max-width: 680px; }
+
+.titulo {
+  margin: 0;
+  font-family: 'Sora', 'Hanken Grotesk', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 46px;
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  color: #e8d9b5;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.apoio {
+  margin: 16px 0 0;
+  max-width: 600px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: rgba(244, 239, 227, 0.72);
+}
+
+/* ── Corpo marfim ── */
+
+.corpo {
+  flex: 1;
+  background: #f2eee3;
+  color: #16140f;
+}
+
+.corpo > .conteudo {
+  padding-top: 28px;
+  padding-bottom: 48px;
+}
+
+:where(.corpo) :where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #16140f;
+  outline-offset: 2px;
+}
+
+/* Busca (só em listas longas) */
+.busca {
+  max-width: 420px;
+  margin-bottom: 26px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition:
-    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-    border-color 0.2s,
-    box-shadow 0.28s ease;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid #e3dccb;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #5f5a4e;
+  transition: border-color 0.15s;
 }
 
-.cardNova:hover {
-  border-color: var(--gold);
+.busca:focus-within {
+  border-color: #c2a063;
+  outline: 2px solid #16140f;
+  outline-offset: 2px;
 }
 
-.cardNova .cardContent {
-  position: static;
+.buscaInput {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  font-size: 15px;
+  color: #16140f;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+/* O contorno de foco fica no contêiner da busca (acima) */
+:where(.corpo) .buscaInput:focus-visible { outline: none; }
+
+.buscaInput::placeholder { color: #6f6a5d; }
+
+.semResultado {
+  margin: 0 0 12px;
+  padding: 18px 20px;
+  border: 1px dashed rgba(22, 20, 15, 0.22);
+  border-radius: 12px;
+  font-size: 14px;
+  color: #5f5a4e;
+  overflow-wrap: anywhere;
+}
+
+
+/* ── Lista de empresas ── */
+.lista {
+  list-style: none;
+  margin: 0;
   padding: 0;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 
-.iconPlus {
-  font-size: 48px;
-  font-weight: 200;
-  color: var(--gold);
-  line-height: 1;
-  transition: transform 0.2s;
+.item {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  border: 1px solid #e3dccb;
+  border-radius: 14px;
+  background: #ffffff;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.cardNova:hover .iconPlus {
-  transform: scale(1.15);
+.item:hover,
+.item:focus-within {
+  border-color: #c2a063;
+  box-shadow: 0 6px 18px rgba(22, 20, 15, 0.06);
 }
 
-.cardLabelNova {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
+.itemPrincipal {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.avatar,
+.avatarImg {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  font-family: 'Sora', 'Hanken Grotesk', system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #e8d9b5;
+  background: #16140f;
+}
+
+.avatarImg {
+  object-fit: cover;
+  border: 1px solid #e3dccb;
+}
+
+.itemTexto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.itemNomeLinha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.itemNome {
+  font-size: 16px;
+  font-weight: 700;
+  color: #16140f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selo {
+  flex-shrink: 0;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
-  margin: 0;
+  color: #6b4f12;
+  background: #fbf1dd;
+  border: 1px solid #ead3a4;
+  border-radius: 999px;
+  padding: 2px 8px;
 }
 
-/* ── Modal de criação ────────────────────────────────────────────────────── */
+.itemDetalhe {
+  font-size: 13.5px;
+  color: #5f5a4e;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemSeta {
+  flex-shrink: 0;
+  color: #5f5a4e;
+  transition: transform 0.15s, color 0.15s;
+}
+
+.item:hover .itemSeta,
+.itemPrincipal:focus-visible .itemSeta {
+  color: #16140f;
+  transform: translateX(3px);
+}
+
+.itemConfig {
+  flex-shrink: 0;
+  width: 52px;
+  display: grid;
+  place-items: center;
+  color: #5f5a4e;
+  background: none;
+  border: none;
+  border-left: 1px solid #e3dccb;
+  border-radius: 0 13px 13px 0;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.itemConfig:hover {
+  color: #16140f;
+  background: #f7f3ea;
+}
+
+/* O contorno de foco fica por dentro do cartão */
+:where(.corpo) .itemPrincipal:focus-visible,
+:where(.corpo) .itemConfig:focus-visible {
+  outline-offset: -4px;
+}
+
+/* Nova empresa */
+.itemNovaWrap,
+.itemNovaWrapDestaque {
+  display: flex;
+}
+
+.itemNova {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 1px dashed rgba(22, 20, 15, 0.28);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.itemNova:hover {
+  border-color: #c2a063;
+  background: #fbf9f4;
+}
+
+.itemNova .itemNome { font-size: 15px; font-weight: 700; }
+
+.itemNovaIcone {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1px solid #e3dccb;
+  background: #ffffff;
+  color: #16140f;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* Sem empresas: o "Criar empresa" vira o cartão principal */
+.itemNovaWrapDestaque .itemNova {
+  border-style: solid;
+  border-color: #e3dccb;
+  background: #ffffff;
+  padding: 20px;
+}
+.itemNovaWrapDestaque .itemNova:hover {
+  border-color: #c2a063;
+  box-shadow: 0 6px 18px rgba(22, 20, 15, 0.06);
+}
+.itemNovaWrapDestaque .itemNovaIcone {
+  border-color: #16140f;
+  background: #16140f;
+  color: #f4efe3;
+}
+
+/* ── Carregamento ── */
+.skelTitulo,
+.skelApoio,
+.skelAvatar,
+.skelTexto,
+.skelTextoCurto {
+  display: block;
+  border-radius: 8px;
+  animation: pulso 1.4s ease-in-out infinite;
+}
+
+.skelTitulo {
+  margin-top: 30px;
+  width: min(460px, 100%);
+  height: 44px;
+  background: rgba(244, 239, 227, 0.1);
+}
+.eyebrow + .skelTitulo { margin-top: 0; }
+
+.skelApoio {
+  margin-top: 18px;
+  width: min(340px, 80%);
+  height: 14px;
+  background: rgba(244, 239, 227, 0.08);
+}
+
+.skelLista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skelItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid #e3dccb;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.skelAvatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #ebe5d6;
+}
+
+.skelTextos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skelTexto {
+  width: min(220px, 70%);
+  height: 12px;
+  background: #e8e2d3;
+}
+
+.skelTextoCurto {
+  width: min(140px, 45%);
+  height: 10px;
+  background: #efeadf;
+}
+
+@keyframes pulso {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* ── Rodapé ── */
+.rodape {
+  text-align: center;
+  padding: 0 16px 32px;
+  background: #f2eee3;
+}
+
+.linkTermos {
+  font-size: 13px;
+  color: #84621d;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.linkTermos:hover { color: #6b4f12; }
+
+.linkTermos:focus-visible {
+  outline: 2px solid #16140f;
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .faixaGrid { flex-direction: column; align-items: stretch; }
+}
+
+@media (max-width: 700px) {
+  .conteudo { padding: 0 16px; }
+  .titulo { font-size: 32px; }
+  .apoio { font-size: 15px; }
+  .eyebrow { margin-top: 22px; }
+  .nav + .faixaGrid { margin-top: 22px; }
+  .skelTitulo { height: 32px; }
+  .corpo > .conteudo { padding-top: 22px; padding-bottom: 36px; }
+  .busca { max-width: none; }
+  .itemPrincipal { padding: 14px; gap: 12px; }
+  .itemNova { padding: 14px; gap: 12px; }
+  .itemNovaWrapDestaque .itemNova { padding: 16px 14px; }
+  .skelItem { padding: 14px; gap: 12px; }
+  .avatar, .avatarImg, .itemNovaIcone, .skelAvatar { width: 40px; height: 40px; }
+  .itemConfig { width: 48px; }
+  .itemNomeLinha { flex-wrap: wrap; row-gap: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item, .itemSeta, .itemNova { transition: none; }
+  .item:hover .itemSeta,
+  .itemPrincipal:focus-visible .itemSeta { transform: none; }
+  .skelTitulo, .skelApoio, .skelAvatar, .skelTexto, .skelTextoCurto { animation: none; }
+  .modal { animation: none; }
+}
+
+/* ── Modais (criar/editar empresa, acessos, imagem, exclusão) — claros ────── */
 
 .modalBackdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(22, 20, 15, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 16px;
   z-index: 100;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(3px);
+  overflow-y: auto;
 }
 
 .modal {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  background: #fbf9f4;
+  color: #16140f;
+  border: 1px solid #e3dccb;
   border-radius: 16px;
   padding: 32px;
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cfc6b3 transparent;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  box-shadow: var(--shadow-modal);
+  gap: 22px;
+  box-shadow: 0 24px 64px rgba(22, 20, 15, 0.2);
   animation: modalIn 0.22s ease;
+  margin: auto;
 }
 
 .modalWide {
-  max-width: 560px;
+  max-width: 580px;
 }
 
 @keyframes modalIn {
-  from { opacity: 0; transform: scale(0.95) translateY(12px); }
+  from { opacity: 0; transform: scale(0.97) translateY(10px); }
   to   { opacity: 1; transform: scale(1)    translateY(0); }
 }
 
+.modal :where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid #16140f;
+  outline-offset: 2px;
+}
+
 .modalTitulo {
-  font-size: 20px;
+  font-family: 'Sora', 'Hanken Grotesk', system-ui, sans-serif;
+  font-size: 22px;
   font-weight: 700;
-  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #16140f;
   margin: 0;
 }
 
@@ -403,10 +632,10 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 14px;
+  padding: 16px;
   border-radius: 14px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.02);
+  border: 1px solid #e3dccb;
+  background: #ffffff;
 }
 
 .membersHeader {
@@ -418,23 +647,24 @@
 
 .membersEyebrow {
   margin: 0 0 4px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--text-muted);
+  color: #5f5a4e;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.16em;
 }
 
 .membersTitle {
   margin: 0;
   font-size: 16px;
-  color: var(--text);
+  font-weight: 700;
+  color: #16140f;
 }
 
 .membersList {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .memberItem {
@@ -444,25 +674,26 @@
   gap: 12px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,0.025);
+  border: 1px solid #e3dccb;
+  background: #fbf9f4;
 }
 
 .memberIdentity {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
 }
 
 .memberName {
-  font-size: 13px;
-  color: var(--text);
+  font-size: 14px;
+  color: #16140f;
+  overflow-wrap: anywhere;
 }
 
 .memberEmail {
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: 13px;
+  color: #5f5a4e;
   word-break: break-word;
 }
 
@@ -483,68 +714,94 @@
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   border: 1px solid transparent;
   white-space: nowrap;
 }
 
 .memberBadgeAdmin {
-  color: var(--gold-light);
-  background: rgba(201, 162, 42, 0.12);
-  border-color: rgba(201, 162, 42, 0.26);
+  color: #6b4f12;
+  background: #fbf1dd;
+  border-color: #ead3a4;
 }
 
 .memberBadgeMember,
 .memberBadgeNeutral {
-  color: var(--text-muted);
-  background: rgba(255,255,255,0.05);
-  border-color: var(--border);
+  color: #5f5a4e;
+  background: #f2eee3;
+  border-color: #e3dccb;
 }
 
 .membersHint {
   margin: 0;
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: 13px;
+  color: #5f5a4e;
 }
 
 .label {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
   font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-weight: 700;
+  color: #5f5a4e;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
 }
 
 .opcional {
   font-weight: 400;
   text-transform: none;
-  color: var(--text-dim);
+  color: #5f5a4e;
   letter-spacing: 0;
 }
 
 .input {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  color: var(--text);
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.input:focus { border-color: var(--gold); }
-.input::placeholder { color: var(--text-dim); }
-
-.inputHint {
-  font-size: 11px;
+  min-width: 0;
+  background: #ffffff;
+  border: 1px solid rgba(22, 20, 15, 0.18);
+  border-radius: 10px;
+  padding: 11px 14px;
+  color: #16140f;
+  font-size: 15px;
   font-weight: 400;
   letter-spacing: 0;
   text-transform: none;
-  color: var(--text-dim);
+  transition: border-color 0.15s;
+}
+
+.input:hover:not(:disabled) { border-color: rgba(22, 20, 15, 0.32); }
+.input:focus { border-color: #c2a063; }
+.input::placeholder { color: #6f6a5d; }
+.input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Campo de arquivo: botão "Escolher arquivo" no estilo secundário */
+.input[type='file'] {
+  padding: 8px 10px;
+  font-size: 14px;
+  color: #5f5a4e;
+  cursor: pointer;
+}
+.input::file-selector-button {
+  margin-right: 12px;
+  padding: 7px 12px;
+  border: 1px solid #e3dccb;
+  border-radius: 8px;
+  background: #f2eee3;
+  color: #16140f;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.input::file-selector-button:hover { background: #ebe5d6; }
+
+.inputHint {
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #5f5a4e;
   line-height: 1.45;
 }
 
@@ -552,8 +809,8 @@
   width: 100%;
   min-height: 140px;
   border-radius: 12px;
-  border: 1px solid var(--border);
-  background-color: rgba(255,255,255,0.03);
+  border: 1px solid #e3dccb;
+  background-color: #f2eee3;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -563,73 +820,115 @@
   align-self: flex-start;
   padding: 8px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(224, 85, 85, 0.24);
-  background: rgba(224, 85, 85, 0.08);
-  color: #ff8b8b;
-  font-size: 12px;
+  border: 1px solid #e5c3bc;
+  background: #ffffff;
+  color: #9a3b2c;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+  transition: background 0.15s;
 }
+.removeImageButton:hover:not(:disabled) { background: #f8e7e3; }
+.removeImageButton:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .erro {
-  color: #e06060;
-  font-size: 12px;
   margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #e5c3bc;
+  border-radius: 10px;
+  background: #f8e7e3;
+  color: #9a3b2c;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .formActions {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
   justify-content: flex-end;
   margin-top: 4px;
 }
 
 .btnCancelar {
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 9px 20px;
-  color: var(--text-muted);
-  font-size: 13px;
+  background: #ffffff;
+  border: 1px solid rgba(22, 20, 15, 0.18);
+  border-radius: 10px;
+  padding: 10px 20px;
+  color: #16140f;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition: border-color 0.15s, background 0.15s;
 }
 
-.btnCancelar:hover { border-color: var(--text-dim); color: var(--text); }
+.btnCancelar:hover:not(:disabled) { border-color: rgba(22, 20, 15, 0.36); background: #f7f3ea; }
 
 .btnCriar {
-  background: var(--gold);
-  border: none;
-  border-radius: 8px;
-  padding: 9px 22px;
-  color: #000;
-  font-size: 13px;
+  background: #16140f;
+  border: 1px solid #16140f;
+  border-radius: 10px;
+  padding: 10px 22px;
+  color: #f4efe3;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
 
-.btnCriar:hover:not(:disabled) { background: var(--gold-light); }
+.btnCriar:hover:not(:disabled) { background: #2b2720; border-color: #2b2720; }
 .btnCriar:disabled, .btnCancelar:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .deleteWarning {
-  font-size: 14px;
-  color: var(--text);
+  font-size: 15px;
+  color: #16140f;
   line-height: 1.6;
   margin: 0;
 }
 
 .btnExcluir {
-  background: #dc2626;
-  border: none;
-  border-radius: 8px;
-  padding: 9px 22px;
-  color: #fff;
-  font-size: 13px;
+  background: #9a3b2c;
+  border: 1px solid #9a3b2c;
+  border-radius: 10px;
+  padding: 10px 22px;
+  color: #ffffff;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.15s;
 }
 
-.btnExcluir:hover:not(:disabled) { background: #b91c1c; }
+.btnExcluir:hover:not(:disabled) { background: #7f2f23; border-color: #7f2f23; }
 .btnExcluir:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Excluir fica dentro da edição, à esquerda, longe do clique principal */
+.btnExcluirLink {
+  margin-right: auto;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  padding: 9px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #9a3b2c;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.btnExcluirLink:hover:not(:disabled) { color: #7f2f23; }
+.btnExcluirLink:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 700px) {
+  .modal { padding: 22px 18px; gap: 18px; }
+  .modalTitulo { font-size: 20px; }
+  .memberItem { flex-wrap: wrap; }
+  .memberBadges { justify-content: flex-start; }
+  /* No celular, "Excluir empresa" ocupa a linha de cima e Cancelar/Salvar dividem a de baixo. */
+  .btnExcluirLink { flex-basis: 100%; text-align: left; }
+  .formActions .btnCancelar,
+  .formActions .btnCriar,
+  .formActions .btnExcluir { flex: 1 1 0; min-width: 0; padding-left: 12px; padding-right: 12px; }
+}

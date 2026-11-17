@@ -5,9 +5,10 @@ import { useToastErrorState } from '../hooks/useToastErrorState'
 
 interface LoginPageProps {
   onForgotPassword: () => void
+  onVoltar?: () => void
 }
 
-export default function LoginPage({ onForgotPassword }: LoginPageProps) {
+export default function LoginPage({ onForgotPassword, onVoltar }: LoginPageProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -47,11 +48,12 @@ export default function LoginPage({ onForgotPassword }: LoginPageProps) {
 
   return (
     <div className={styles.container}>
-      <div className={styles.card}>
-        <div className={styles.logo}>
-          <img src="/logo.png" height="34" alt="PainelGestaa" className={styles.logoImg} />
-        </div>
+      <div className={styles.marca}>
+        <img src="/symbol-gold.svg" alt="" width={22} height={22} />
+        <span>Lab <b>Control</b></span>
+      </div>
 
+      <div className={styles.card}>
         <div className={styles.formHeader}>
           <h1 className={styles.title}>Bem-vindo de volta</h1>
           <p className={styles.subtitle}>Entre com sua conta para continuar</p>
@@ -128,6 +130,14 @@ export default function LoginPage({ onForgotPassword }: LoginPageProps) {
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
+
+        {onVoltar && (
+          <div className={styles.footer}>
+            <button type="button" className={styles.voltarLink} onClick={onVoltar}>
+              ← Voltar ao início
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
