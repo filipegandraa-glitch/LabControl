@@ -8,6 +8,7 @@ import styles from '../../pages/LabControlPage.module.css'
 import { DENTISTA_FILTER_ALL, HOME_MODE_OPTIONS, LAB_FILTER_ALL, isLabDetailTab, isString, type LabControlPermissions, type LabHomeMode } from './constants'
 import { IconAlert, IconArchive, IconBack, IconCalendar, IconClock, IconEdit, IconList, IconMail, IconPhone, IconPlus, IconSettings2, IconTrash } from './icons'
 import { ArquivadosModal, ConfirmarArquivamentoModal, DentistasModal, EtiquetasModal, FormasEnvioModal, KanbanConfigModal, LabModal, PrecosModal } from './LabModals'
+import { BotaoTema } from './BotaoTema'
 import { CalendarView } from './CalendarView'
 import { EnvioResumoModal } from './EnvioResumoModal'
 import { EnvioSteps } from './EnvioSteps'
@@ -179,6 +180,7 @@ export function LabDetailView({ lab, empresaId, userId, isAdmin, permissions, co
           )}
         </div>
         <div className={styles.headerActions}>
+          <BotaoTema />
           {(can('editar_laboratorios') || can('lista_precos') || isAdmin || can('arquivados')) && (
             <>
               {can('editar_laboratorios') && (
@@ -695,6 +697,7 @@ export function LabsAggregateDetailView({
             onOpenFinanceiro={() => setShowFinanceiro(true)}
             onOpenEtiquetas={() => setShowEtiquetas(true)}
           />
+          <BotaoTema />
         </div>
       </div>
 
@@ -747,7 +750,6 @@ export function LabsAggregateDetailView({
           onOpenResumo={setResumoEnvio}
           onEditEnvio={envio => { setEditingEnvio(envio); setShowEnvioSteps(true) }}
           onDeleteEnvio={deleteEnvioAgg}
-          onClose={() => onHomeModeChange('kanban')}
         />
       ) : homeMode === 'list' ? (
         <ServicesListView

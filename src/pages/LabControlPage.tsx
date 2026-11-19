@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Empresa, Lab, LabKanbanColuna } from '../lib/types'
 import ModalTransition from '../components/ModalTransition'
+import { BotaoTema } from '../components/lab-control/BotaoTema'
+import { useAplicarTema } from '../lib/tema'
 import styles from './LabControlPage.module.css'
 import {
   DEFAULT_COLUNAS,
@@ -21,6 +23,7 @@ import { buildLabControlPermissions, getAllLabControlPermissions, type LabContro
 export default function LabControlPage({ userId, empresa, onTrocarEmpresa, onVoltar }: {
   userId: string; empresa: Empresa; onTrocarEmpresa: () => void; onVoltar: () => void
 }) {
+  useAplicarTema()
   const [isAdmin,      setIsAdmin]      = useState(false)
   const [labPermissions, setLabPermissions] = useState<LabControlPermissions>({})
   const [labs,         setLabs]         = useState<Lab[]>([])
@@ -141,6 +144,7 @@ export default function LabControlPage({ userId, empresa, onTrocarEmpresa, onVol
         <div className={styles.pageHeader}>
           <button type="button" className={styles.backBtn} onClick={onVoltar}><IconBack /> Voltar</button>
           <h1 className={styles.pageTitle}>Controle de Laboratórios</h1>
+          <div className={styles.headerActions}><BotaoTema /></div>
         </div>
         <Spinner />
       </div>

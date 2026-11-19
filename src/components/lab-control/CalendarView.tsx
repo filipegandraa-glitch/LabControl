@@ -4,7 +4,7 @@ import styles from '../../pages/LabControlPage.module.css'
 import { IconArchive, IconClock, IconEdit } from './icons'
 import { buildCalendarEvents, formatDate, today, type CalendarEvent } from './utils'
 
-export function CalendarView({ envios, precosByLab, labs, canDeleteEnvio, onOpenResumo, onEditEnvio, onDeleteEnvio, onClose }: {
+export function CalendarView({ envios, precosByLab, labs, canDeleteEnvio, onOpenResumo, onEditEnvio, onDeleteEnvio }: {
   envios: LabEnvio[]
   precosByLab: Record<string, LabPreco[]>
   labs: Lab[]
@@ -12,7 +12,6 @@ export function CalendarView({ envios, precosByLab, labs, canDeleteEnvio, onOpen
   onOpenResumo: (envio: LabEnvio) => void
   onEditEnvio: (envio: LabEnvio) => void
   onDeleteEnvio: (envioId: string) => void
-  onClose: () => void
 }) {
   const [currentMonth, setCurrentMonth] = useState(() => {
     const now = new Date()
@@ -62,9 +61,6 @@ export function CalendarView({ envios, precosByLab, labs, canDeleteEnvio, onOpen
           <span>{labsWithEventsCount} laboratório(s)</span>
         </div>
         <button type="button" className={styles.btnIcon} onClick={nextMonth}>›</button>
-        <button type="button" className={styles.btnSecondary} onClick={onClose} style={{ marginLeft: 'auto' }}>
-          Fechar Calendário
-        </button>
       </div>
       <div className={styles.calendarGrid}>
         {weekDays.map(d => (
